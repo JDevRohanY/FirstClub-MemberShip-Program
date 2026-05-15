@@ -2,6 +2,7 @@ package com.JDevRohanY.FirstClubMembershipProgram.controllers;
 
 import com.JDevRohanY.FirstClubMembershipProgram.dtos.CreateSubscriptionRequestDto;
 import com.JDevRohanY.FirstClubMembershipProgram.dtos.CreateSubscriptionResponseDto;
+import com.JDevRohanY.FirstClubMembershipProgram.dtos.CurrentSubscriptionResponseDto;
 import com.JDevRohanY.FirstClubMembershipProgram.dtos.UpdateTierRequestDto;
 import com.JDevRohanY.FirstClubMembershipProgram.models.Subscription;
 import com.JDevRohanY.FirstClubMembershipProgram.services.SubscriptionService;
@@ -70,5 +71,12 @@ public class SubscriptionController {
         responseDto.setCreatedAt(subscription.getCreatedAt());
 
         return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/{userId}/current")
+    public ResponseEntity<CurrentSubscriptionResponseDto> getCurrentSubscription(
+            @PathVariable String userId) {
+        return ResponseEntity.ok(
+                subscriptionService.getCurrentSubscription(userId));
     }
 }

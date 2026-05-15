@@ -1,5 +1,6 @@
 package com.JDevRohanY.FirstClubMembershipProgram.services;
 
+import com.JDevRohanY.FirstClubMembershipProgram.dtos.CurrentSubscriptionResponseDto;
 import com.JDevRohanY.FirstClubMembershipProgram.exceptions.PlanNotFoundException;
 import com.JDevRohanY.FirstClubMembershipProgram.exceptions.SubscriptionNotFoundException;
 import com.JDevRohanY.FirstClubMembershipProgram.exceptions.TierNotFoundException;
@@ -12,6 +13,9 @@ import com.JDevRohanY.FirstClubMembershipProgram.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -120,7 +124,44 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Subscription getCurrentSubscription(String userId) {
-        return null;
+    public CurrentSubscriptionResponseDto getCurrentSubscription(String userId) {
+        log.info("Fetching current subscription for userId: {}", userId);
+
+        // validate user exists
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+
+        // find active subscription
+        Subscription subscription = subscriptionRepository.findActiveByUserId(userId).orElseThrow(() -> new SubscriptionNotFoundException("No active subscription for user: " + userId));
+
+        // get plan details
+        MembershipPlan plan = planRepository.findById(subscription.getPlanId()).orElseThrow(() -> new PlanNotFoundException("Plan not found: " + subscription.getPlanId()));
+
+        // get tier details
+        MembershipTier tier = tierRepository.findById(subscription.getTierId()).orElseThrow(() -> new TierNotFoundException("Tier not found: " + subscription.getTierId()));
+
+        // calculate days remaining
+        long diffInMillis = subscription.getExpiryDate().getTime() - new Date().getTime();
+        long daysRemaining = diffInMillis / (1000 * 60 * 60 * 24);
+
+        // build response
+        CurrentSubscriptionResponseDto responseDto = new CurrentSubscriptionResponseDto();
+        responseDto.setSubscriptionId(subscription.getId());
+        responseDto.setUserId(userId);
+        responseDto.setPlanId(plan.getId());
+        responseDto.setPlanType(plan.getPlanType().toString());
+        responseDto.setPlanPrice(plan.getPrice());
+        responseDto.setTierId(tier.getId());
+        responseDto.setTierType(tier.getTierType().toString());
+        responseDto.setDiscountPercentage(tier.getDiscountPercentage());
+        responseDto.setFreeDelivery(tier.isFreeDelivery());
+        responseDto.setExclusiveDeals(tier.isExclusiveDeals());
+        responseDto.setPrioritySupport(tier.isPrioritySupport());
+        responseDto.setStatus(subscription.getStatus().toString());
+        responseDto.setStartDate(subscription.getStartDate());
+        responseDto.setExpiryDate(subscription.getExpiryDate());
+        responseDto.setDaysRemaining(daysRemaining);
+
+        log.info("Found active subscription: {}", subscription.getId());
+        return responseDto;
     }
 }
