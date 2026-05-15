@@ -1,6 +1,7 @@
 package com.JDevRohanY.FirstClubMembershipProgram.services;
 
 import com.JDevRohanY.FirstClubMembershipProgram.exceptions.PlanNotFoundException;
+import com.JDevRohanY.FirstClubMembershipProgram.exceptions.SubscriptionNotFoundException;
 import com.JDevRohanY.FirstClubMembershipProgram.exceptions.TierNotFoundException;
 import com.JDevRohanY.FirstClubMembershipProgram.exceptions.UserNotFoundException;
 import com.JDevRohanY.FirstClubMembershipProgram.models.*;
@@ -67,7 +68,30 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription upgradeTier(String subscriptionId, String newTierId) {
-        return null;
+        log.info("Updating tier for subscriptionId: {}", subscriptionId);
+
+        // validate subscription exists
+        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + subscriptionId));
+
+        // validate subscription is active
+        if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
+            throw new IllegalArgumentException("Cannot update tier — subscription is not active");
+        }
+
+        // validate new tier exists
+        MembershipTier newTier = tierRepository.findById(newTierId).orElseThrow(() -> new TierNotFoundException("Tier not found: " + newTierId));
+
+        // validate not same tier
+        if (subscription.getTierId().equals(newTierId)) {
+            throw new IllegalArgumentException("Already on this tier: " + newTierId);
+        }
+
+        // update tier
+        subscription.setTierId(newTierId);
+        subscription.setUpdatedAt(new Date());
+
+        log.info("Tier updated to: {} for subscription: {}", newTierId, subscriptionId);
+        return subscription;
     }
 
     @Override

@@ -6,10 +6,7 @@ import com.JDevRohanY.FirstClubMembershipProgram.models.Subscription;
 import com.JDevRohanY.FirstClubMembershipProgram.services.SubscriptionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/subscriptions")
@@ -36,5 +33,26 @@ public class SubscriptionController {
         responseDto.setCreatedAt(subscription.getCreatedAt());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @PatchMapping("/{id}/tier")
+    public ResponseEntity<CreateSubscriptionResponseDto> updateTier(
+            @PathVariable String id,
+            @RequestBody UpdateTierRequestDto requestDto) {
+
+        Subscription subscription = subscriptionService
+                .upgradeTier(id, requestDto.getTierId());
+
+        CreateSubscriptionResponseDto responseDto = new CreateSubscriptionResponseDto();
+        responseDto.setId(subscription.getId());
+        responseDto.setUserId(subscription.getUserId());
+        responseDto.setPlanId(subscription.getPlanId());
+        responseDto.setTierId(subscription.getTierId());
+        responseDto.setStatus(subscription.getStatus().toString());
+        responseDto.setStartDate(subscription.getStartDate());
+        responseDto.setExpiryDate(subscription.getExpiryDate());
+        responseDto.setCreatedAt(subscription.getCreatedAt());
+
+        return ResponseEntity.ok(responseDto);
     }
 }
