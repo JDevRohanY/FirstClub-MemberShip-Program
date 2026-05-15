@@ -1,5 +1,6 @@
 package com.JDevRohanY.FirstClubMembershipProgram.models;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
