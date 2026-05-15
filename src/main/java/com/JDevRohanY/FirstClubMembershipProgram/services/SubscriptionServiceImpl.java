@@ -96,7 +96,27 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public Subscription cancelSubscription(String subscriptionId) {
-        return null;
+        log.info("Cancelling subscription: {}", subscriptionId);
+
+        // validate subscription exists
+        Subscription subscription = subscriptionRepository.findById(subscriptionId).orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + subscriptionId));
+
+        // validate it's active
+        if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
+            throw new IllegalArgumentException("Subscription is already " + subscription.getStatus());
+        }
+
+        // cancel subscription
+        subscription.setStatus(SubscriptionStatus.CANCELLED);
+        subscription.setUpdatedAt(new Date());
+
+        // update user membership status to inactive
+        User user = userRepository.findById(subscription.getUserId()).orElseThrow(() -> new UserNotFoundException("User not found: " + subscription.getUserId()));
+        user.setMembershipStatus(MembershipStatus.INACTIVE);
+        user.setUpdatedAt(new Date());
+
+        log.info("Subscription cancelled: {}", subscriptionId);
+        return subscription;
     }
 
     @Override
