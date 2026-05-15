@@ -1,4 +1,7 @@
 package com.JDevRohanY.FirstClubMembershipProgram.exceptions;
 
-public class SubscriptionNotFoundException {
+public class SubscriptionNotFoundException extends RuntimeException {
+    public SubscriptionNotFoundException(String message) {
+        super(message);
+    }
 }
