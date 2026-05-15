@@ -5,7 +5,9 @@ import com.JDevRohanY.FirstClubMembershipProgram.dtos.CreateSubscriptionResponse
 import com.JDevRohanY.FirstClubMembershipProgram.dtos.CurrentSubscriptionResponseDto;
 import com.JDevRohanY.FirstClubMembershipProgram.dtos.UpdateTierRequestDto;
 import com.JDevRohanY.FirstClubMembershipProgram.models.Subscription;
+import com.JDevRohanY.FirstClubMembershipProgram.models.TierType;
 import com.JDevRohanY.FirstClubMembershipProgram.services.SubscriptionService;
+import com.JDevRohanY.FirstClubMembershipProgram.services.TierEligibiltyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/subscriptions")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
+    private final TierEligibiltyService tierEligibiltyService;
 
-    public SubscriptionController(SubscriptionService subscriptionService) {
+    public SubscriptionController(SubscriptionService subscriptionService, TierEligibiltyService tierEligibiltyService) {
         this.subscriptionService = subscriptionService;
+        this.tierEligibiltyService = tierEligibiltyService;
     }
 
     @PostMapping
@@ -78,5 +82,15 @@ public class SubscriptionController {
             @PathVariable String userId) {
         return ResponseEntity.ok(
                 subscriptionService.getCurrentSubscription(userId));
+    }
+
+
+    @GetMapping("/{userId}/eligible-tier")
+    public ResponseEntity<String> getEligibleTier(@PathVariable String userId) {
+        TierType eligibleTier = tierEligibiltyService.getEligibleTier(userId);
+        if (eligibleTier == null) {
+            return ResponseEntity.ok("Not eligible for any tier yet");
+        }
+        return ResponseEntity.ok("Eligible for: " + eligibleTier);
     }
 }
