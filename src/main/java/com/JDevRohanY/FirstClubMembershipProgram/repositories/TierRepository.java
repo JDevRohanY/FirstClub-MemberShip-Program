@@ -31,7 +31,7 @@ public class TierRepository {
                 .minOrders(minOrders)
                 .minOrderValue(minOrderValue)
                 .build();
-        tier.setId("tier-silver");
+        tier.setId(id);
         tier.setCreatedAt(new Date());
         tierMap.put(id, tier);
     }

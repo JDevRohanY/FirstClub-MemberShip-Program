@@ -2,9 +2,11 @@ package com.JDevRohanY.FirstClubMembershipProgram.services;
 
 import com.JDevRohanY.FirstClubMembershipProgram.models.TierType;
 import com.JDevRohanY.FirstClubMembershipProgram.stratergy.TierEligibilityStrategy;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class TierEligibiltyService {
     private final List<TierEligibilityStrategy> strategies;
 
